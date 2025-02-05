@@ -16,7 +16,6 @@ public interface IMemberRepository {
 
     List<Member> getAllMembers() throws SQLException;
 
-    Long deleteMember(String memberId) throws SQLException;
 
     void editMember(Member member) throws SQLException;
 

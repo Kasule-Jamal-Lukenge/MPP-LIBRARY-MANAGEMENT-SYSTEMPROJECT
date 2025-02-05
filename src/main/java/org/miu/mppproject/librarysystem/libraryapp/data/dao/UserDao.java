@@ -3,10 +3,9 @@ package org.miu.mppproject.librarysystem.libraryapp.data.dao;
 import org.miu.mppproject.librarysystem.libraryapp.core.dataaccessfacade.DataSource;
 import org.miu.mppproject.librarysystem.libraryapp.data.entities.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -15,7 +14,8 @@ public class UserDao {
     private Connection connection;
     private static final Logger LOGGER = Logger.getLogger(UserDao.class.getName());
 
-    public UserDao(DataSource dataSource) {
+    @Inject
+    public UserDao(@Named("Lib") DataSource dataSource) {
         this.dataSource = dataSource;
         connection = dataSource.getConnection();
     }
@@ -184,6 +184,81 @@ public class UserDao {
         } catch (SQLException e) {
             connection.rollback();
             throw new SQLException("Error deleting user: " + e.getMessage());
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+
+    public void addPermissions(List<Permission> permissions) throws SQLException {
+        String insertPermissionSQL = "INSERT INTO Permission (id, action_name) VALUES (?, ?)";
+        connection.setAutoCommit(false);
+
+        try (PreparedStatement permissionStmt = connection.prepareStatement(insertPermissionSQL)) {
+            for (Permission permission : permissions) {
+                permissionStmt.setString(1, permission.getId());
+                permissionStmt.setString(2, permission.getActionName());
+                permissionStmt.executeUpdate();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new SQLException("Error adding permissions: " + e.getMessage());
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+
+
+    public List<Role> getAllRoles() throws SQLException {
+        String sql = "SELECT * FROM Role";
+        List<Role> roles = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                roles.add(new Role(
+                        rs.getString("name"),
+                        fetchPermissions(rs.getString("id"))
+                ));
+            }
+        }
+        return roles;
+    }
+
+
+    public void assignRoleToUser(String userId, String roleId) throws SQLException {
+        String sql = "UPDATE User SET role_id = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, roleId);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+
+    public Long deleteRole(String roleId) throws SQLException {
+        String deleteRolePermissionsSQL = "DELETE FROM Role_Permissions WHERE role_id = ?";
+        String deleteRoleSQL = "DELETE FROM Role WHERE id = ?";
+
+        connection.setAutoCommit(false);
+
+        try (PreparedStatement deleteRolePermissionsStmt = connection.prepareStatement(deleteRolePermissionsSQL);
+             PreparedStatement deleteRoleStmt = connection.prepareStatement(deleteRoleSQL)) {
+
+            // Remove Role Permissions
+            deleteRolePermissionsStmt.setString(1, roleId);
+            deleteRolePermissionsStmt.executeUpdate();
+
+            // Delete Role
+            deleteRoleStmt.setString(1, roleId);
+            int affectedRows = deleteRoleStmt.executeUpdate();
+
+            connection.commit();
+            return (long) affectedRows;
+        } catch (SQLException e) {
+            connection.rollback();
+            throw new SQLException("Error deleting role: " + e.getMessage());
         } finally {
             connection.setAutoCommit(true);
         }

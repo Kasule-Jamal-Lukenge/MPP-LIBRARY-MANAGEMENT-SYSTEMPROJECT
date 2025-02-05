@@ -16,7 +16,7 @@ public class DashBoardScreen extends VBox {
         titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         Button logoutButton = new Button("Logout");
-        logoutButton.setOnAction(event -> screenManager.showScreen(new LoginScreen(screenManager)));
+//        logoutButton.setOnAction(event -> screenManager.showScreen(new LoginScreen(screenManager)));
 
         setSpacing(10);
         setAlignment(Pos.CENTER);

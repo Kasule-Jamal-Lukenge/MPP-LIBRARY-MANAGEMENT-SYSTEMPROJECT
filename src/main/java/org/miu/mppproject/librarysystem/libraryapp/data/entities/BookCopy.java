@@ -1,5 +1,7 @@
 package org.miu.mppproject.librarysystem.libraryapp.data.entities;
 
+
+
 public class BookCopy extends BaseEntity {
 
     private int copyNumber;
@@ -15,7 +17,7 @@ public class BookCopy extends BaseEntity {
 
     @Override
     public String getId() {
-        return STR."\{copyNumber}";
+        return String.valueOf(copyNumber);
     }
 
 

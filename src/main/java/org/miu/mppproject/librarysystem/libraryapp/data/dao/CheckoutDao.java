@@ -150,7 +150,7 @@ public class CheckoutDao {
     }
 
     private CheckoutEntry mapToCheckoutEntry(ResultSet rs) throws SQLException {
-        // Step 1: Create the Member object with ContactInfo and Address
+
         Member member = new Member(
                 new ContactInfo(
                         rs.getString("first_name"),
@@ -166,18 +166,18 @@ public class CheckoutDao {
         );
         member.setMemberId(rs.getString("member_id"));
 
-        // Step 2: Fetch the book (including its authors and all book copies)
+        // Fetch the book (including its authors and all book copies)
         String isbn = rs.getString("isbn");
         Book book = fetchBookWithAuthorsAndCopies(isbn);
 
-        // Step 3: Create the BookCopy and ensure it references the full Book
+        //  Create the BookCopy and ensure it references the full Book
         BookCopy bookCopy = new BookCopy(
                 rs.getBoolean("is_available"),
                 rs.getInt("copy_number"),
                 book
         );
 
-        // Step 4: Create and return the fully populated CheckoutEntry
+        //  Create and return the fully populated CheckoutEntry
         CheckoutEntry checkoutEntry = new CheckoutEntry(
                 bookCopy,
                 member,
@@ -192,10 +192,10 @@ public class CheckoutDao {
     }
 
     private BookCopy getAvailableBookCopy(String copyNumber, String isbn) throws SQLException {
-        // Step 1: Fetch the book (with all its book copies)
+        // Fetch the book (with all its book copies)
         Book book = fetchBookWithAuthorsAndCopies(isbn);
 
-        // Step 2: Find the specific book copy in the database
+        // Find the specific book copy in the database
         String query = "SELECT copy_number, is_available FROM book_copies WHERE copy_number = ? AND isbn = ? AND is_available = true";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, copyNumber);
@@ -216,7 +216,7 @@ public class CheckoutDao {
     private Book fetchBookWithAuthorsAndCopies(String isbn) throws SQLException {
         Book book = null;
 
-        // Step 1: Fetch book details
+        //  Fetch book details
         String bookQuery = """
                     SELECT b.isbn, b.title, b.max_checkout_length
                     FROM books b
@@ -240,7 +240,7 @@ public class CheckoutDao {
 
         if (book == null) return null;
 
-        // Step 2: Fetch all book copies for this book
+        //  Fetch all book copies for this book
         String bookCopiesQuery = """
                     SELECT bc.copy_number, bc.is_available
                     FROM book_copies bc

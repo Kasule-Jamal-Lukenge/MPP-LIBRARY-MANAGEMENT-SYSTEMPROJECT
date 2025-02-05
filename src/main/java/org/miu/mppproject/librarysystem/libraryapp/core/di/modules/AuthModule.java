@@ -47,8 +47,8 @@ public abstract class AuthModule {
 
     @Provides
     @Singleton
-    static AuthenticationServer provideAuthenticationServer(@Named("Credential") DataSource dataSource) {
-        return new AuthenticationServer(dataSource);
+    static AuthenticationServer provideAuthenticationServer() {
+        return new AuthenticationServer();
     }
 
 

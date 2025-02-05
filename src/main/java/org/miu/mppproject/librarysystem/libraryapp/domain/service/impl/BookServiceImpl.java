@@ -1,6 +1,7 @@
 package org.miu.mppproject.librarysystem.libraryapp.domain.service.impl;
 
 import org.miu.mppproject.librarysystem.libraryapp.data.entities.Book;
+import org.miu.mppproject.librarysystem.libraryapp.data.entities.BookCopy;
 import org.miu.mppproject.librarysystem.libraryapp.data.entities.Member;
 import org.miu.mppproject.librarysystem.libraryapp.domain.repositories.IBookRepository;
 import org.miu.mppproject.librarysystem.libraryapp.domain.service.contract.IBookService;
@@ -22,7 +23,7 @@ public class BookServiceImpl implements IBookService {
     }
 
     @Override
-    public List<Book> getAllBookCopies(String isbn) {
+    public List<BookCopy> getAllBookCopies(String isbn) {
         return bookRepository.getAllBookCopies(isbn);
     }
 

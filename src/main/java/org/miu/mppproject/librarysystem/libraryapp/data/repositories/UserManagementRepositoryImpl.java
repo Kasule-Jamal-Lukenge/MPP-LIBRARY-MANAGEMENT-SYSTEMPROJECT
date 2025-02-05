@@ -38,7 +38,7 @@ public class UserManagementRepositoryImpl implements IUserManagementRepository {
     @Override
     public void assignRoleToUser(String userId, String roleId) {
         try {
-            userDao.addRoleToUser(userId,roleId);
+            userDao.assignRoleToUser(userId,roleId);
         } catch (SQLException e) {
             throw new UserException("Something went wrong");
         }

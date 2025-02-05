@@ -5,6 +5,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.miu.mppproject.librarysystem.libraryapp.core.dataaccessfacade.DataSource;
+import org.miu.mppproject.librarysystem.libraryapp.core.di.AppComponent;
+import org.miu.mppproject.librarysystem.libraryapp.core.di.DaggerAppComponent;
 import org.miu.mppproject.librarysystem.libraryapp.core.navigation.NavigationController;
 import org.miu.mppproject.librarysystem.libraryapp.core.navigation.ScreenManager;
 
@@ -17,11 +19,11 @@ public class LibraryManagementSystem extends Application {
 
     @Inject
     @Named("Credential")
-    private DataSource credentialDataSource;
+    DataSource credentialDataSource;
 
     @Inject
     @Named("Lib")
-    private DataSource libDataSource;
+    DataSource libDataSource;
 
 
     @Override
@@ -55,6 +57,10 @@ public class LibraryManagementSystem extends Application {
 
 
     public static void main(String[] args) {
+
+        AppComponent appComponent = DaggerAppComponent.create();
+        LibraryManagementSystem libraryManagementSystem = new LibraryManagementSystem();
+        appComponent.inject(libraryManagementSystem);
         launch(args);
     }
 

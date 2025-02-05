@@ -36,10 +36,7 @@ public class MemberRepositoryImpl implements IMemberRepository {
         return memberDao.getAllMembers();
     }
 
-    @Override
-    public Long deleteMember(String memberId) throws SQLException {
-        return memberDao.deleteMember(memberId);
-    }
+
 
     @Override
     public void editMember(Member member) throws SQLException {

@@ -45,15 +45,6 @@ public class UserManagementManagementServiceImpl implements IUserManagementServi
         }
     }
 
-//    @Override
-//    public Long deletePermission(String permissionId) {
-//        try {
-//            return userRepository.deletePermission(permissionId);
-//        } catch (SQLException e) {
-//            throw new UserException("Error deleting permission");
-//        }
-//
-//    }
 
 
     @Override
@@ -95,11 +86,6 @@ public class UserManagementManagementServiceImpl implements IUserManagementServi
 
     }
 
-
-//    @Override
-//    public void addPermissionsToRole(String roleId, List<String> permissionIds) {
-//        userRepository.addPermissionsToRole(roleId, permissionIds);
-//    }
 
     @Override
     public Long deleteUser(String userId) {

@@ -1,6 +1,5 @@
 package org.miu.mppproject.librarysystem.libraryapp.data.entities;
 
-import java.util.List;
 
 public final class User extends Person {
 

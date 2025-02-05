@@ -10,7 +10,7 @@ import java.time.Duration;
 public class AuthenticationServer {
 
     @Inject
-    private CredentialDao credentialDao;
+    CredentialDao credentialDao;
 
     private Token token;
     private UserInfo userInfo;

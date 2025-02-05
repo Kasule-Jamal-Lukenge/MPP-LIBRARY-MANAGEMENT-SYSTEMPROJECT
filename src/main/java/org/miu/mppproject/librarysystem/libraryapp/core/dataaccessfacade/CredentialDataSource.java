@@ -28,10 +28,7 @@ public class CredentialDataSource implements DataSource {
                 username VARCHAR(100) NOT NULL UNIQUE,
                 password VARCHAR(60) NOT NULL,  -- Increased length for hashed passwords
                 role VARCHAR(20) NOT NULL
-                            );
-                
-                
-                
+                            ); 
                 """;
 
         try (Statement stmt = connection.createStatement()) {

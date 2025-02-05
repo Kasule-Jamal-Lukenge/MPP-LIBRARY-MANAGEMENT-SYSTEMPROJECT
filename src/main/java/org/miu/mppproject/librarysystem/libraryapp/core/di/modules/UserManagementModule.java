@@ -1,5 +1,6 @@
 package org.miu.mppproject.librarysystem.libraryapp.core.di.modules;
 
+import dagger.Module;
 import dagger.Provides;
 import org.miu.mppproject.librarysystem.libraryapp.core.dataaccessfacade.DataSource;
 import org.miu.mppproject.librarysystem.libraryapp.core.security.AuthenticationServer;
@@ -13,6 +14,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.sql.Connection;
 
+@Module
 public class UserManagementModule {
 
 
