@@ -1,0 +1,45 @@
+/* styles.css */
+
+/* General styling for the whole app */
+.root {
+    -fx-background-color: #f5f5f5; /* Light background */
+    -fx-font-family: Arial, sans-serif;
+    -fx-padding: 20px;
+}
+
+/* Button styling (similar to Bootstrap buttons) */
+.btn {
+    -fx-background-color: #007bff; /* Bootstrap primary color */
+    -fx-text-fill: white;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 123, 255, 0.6), 5, 0.5, 0, 2);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    -fx-background-color: #0056b3; /* Darker shade on hover */
+    -fx-effect: dropshadow(gaussian, rgba(0, 86, 179, 0.6), 5, 0.5, 0, 2);
+}
+
+/* Style for the login screen */
+.login-screen {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 10px;
+    -fx-padding: 40px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 10, 0.5, 0, 2);
+}
+
+/* Optional: Add some space around form fields, input boxes, etc. */
+.input-field {
+    -fx-padding: 10px;
+    -fx-background-color: #f1f1f1;
+    -fx-border-radius: 5px;
+    -fx-border-color: #ccc;
+    -fx-font-size: 14px;
+}

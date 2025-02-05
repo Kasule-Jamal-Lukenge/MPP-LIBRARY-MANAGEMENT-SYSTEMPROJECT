@@ -1,0 +1,20 @@
+module org.miu.mppproject.librarysystem.libraryapp {
+    requires javafx.controls;
+    requires javafx.fxml;
+
+    requires org.controlsfx.controls;
+    requires com.dlsc.formsfx;
+    requires org.kordamp.bootstrapfx.core;
+    requires com.almasb.fxgl.all;
+    requires java.sql;
+    requires javax.inject;
+    requires dagger;
+    requires io.reactivex.rxjava2;
+    requires com.google.errorprone.annotations;
+    requires org.checkerframework.checker.qual;
+    requires jbcrypt;
+
+    opens org.miu.mppproject.librarysystem.libraryapp to javafx.fxml;
+    exports org.miu.mppproject.librarysystem.libraryapp;
+    opens org.miu.mppproject.librarysystem.libraryapp.presentation to javafx.fxml;
+}
