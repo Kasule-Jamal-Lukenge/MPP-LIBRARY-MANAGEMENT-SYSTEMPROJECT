@@ -21,7 +21,7 @@ public class CredentialDataSource implements DataSource {
     private void createTable() {
         String sql = """
                 -- Create User Credential table
-                CREATE TABLE IF NOT EXISTS user_credential (
+                CREATE TABLE IF NOT EXISTS "user_credential" (
                     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                     username VARCHAR(100) NOT NULL UNIQUE,
                     password VARCHAR(255) NOT NULL, 
