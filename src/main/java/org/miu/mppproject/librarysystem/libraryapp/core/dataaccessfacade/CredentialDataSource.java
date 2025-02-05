@@ -6,7 +6,6 @@ import java.sql.Statement;
 
 public class CredentialDataSource implements DataSource {
 
-
     private final Connection connection;
 
     public CredentialDataSource(Connection connection) {
@@ -21,20 +20,19 @@ public class CredentialDataSource implements DataSource {
 
     private void createTable() {
         String sql = """
-                
                 -- Create User Credential table
-                CREATE TABLE user_credential (
-                id VARCHAR(50) PRIMARY KEY,
-                username VARCHAR(100) NOT NULL UNIQUE,
-                password VARCHAR(60) NOT NULL,  -- Increased length for hashed passwords
-                role VARCHAR(20) NOT NULL
-                            ); 
+                CREATE TABLE IF NOT EXISTS user_credential (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    username VARCHAR(100) NOT NULL UNIQUE,
+                    password VARCHAR(255) NOT NULL, 
+                    role VARCHAR(50) NOT NULL
+                );
                 """;
 
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
-            e.printStackTrace();  // Handle error properly
+            throw new RuntimeException("Error creating user_credential table", e);
         }
     }
 

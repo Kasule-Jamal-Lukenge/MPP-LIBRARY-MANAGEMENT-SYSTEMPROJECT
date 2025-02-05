@@ -16,8 +16,6 @@ public interface IUserManagementService {
 
     void addPermissions(List<Permission> permissions);
 
-//    Long deletePermission(String permissionId);
-
     void addRole(Role role);
 
     List<Role> getAllRoles();
@@ -25,9 +23,6 @@ public interface IUserManagementService {
     Long deleteRole(String roleId) throws SQLException;
 
     void addRoleToUser(String roleId, String userId) throws SQLException;
-
-
-//    void addPermissionsToRole(String roleId, List<String> permissionIds);
 
     Long deleteUser(String userId);
 

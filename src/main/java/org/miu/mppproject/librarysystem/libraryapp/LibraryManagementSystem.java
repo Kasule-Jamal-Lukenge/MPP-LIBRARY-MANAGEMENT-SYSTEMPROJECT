@@ -45,12 +45,12 @@ public class LibraryManagementSystem extends Application {
     @Override
     public void init() throws Exception {
         super.init();
-        connectToDb();
+        initDb();
 
     }
 
 
-    private void connectToDb() {
+    private void initDb() {
         credentialDataSource.initializeDatabase();
         libDataSource.initializeDatabase();
     }

@@ -21,7 +21,7 @@ public class DatabaseModule {
     static DataSource provideLibraryDataSource() {
         try {
 
-            return new LibraryDataSource(DriverManager.getConnection("jdbc:postgresql://localhost:5432/librarydb", "Benklins", "Benklins@123"));
+            return new LibraryDataSource(DriverManager.getConnection("jdbc:postgresql://localhost:5432/librarydb", "postgres", "Benklins@123"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -34,7 +34,7 @@ public class DatabaseModule {
     @Named("Credential")
     static DataSource provideCredentialDataSource() {
         try {
-            return new CredentialDataSource(DriverManager.getConnection("jdbc:postgresql://localhost:5432/credentialdb", "Benklins", "Benklins@123"));
+            return new CredentialDataSource(DriverManager.getConnection("jdbc:postgresql://localhost:5432/credentialdb", "postgres", "Benklins@123"));
         } catch (SQLException e) {
             Logger.getLogger(String.valueOf(DatabaseModule.class)).info(e.getMessage());
         }
