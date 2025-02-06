@@ -9,9 +9,10 @@ module org.miu.mppproject.librarysystem.libraryapp {
     requires java.sql;
     requires javax.inject;
     requires dagger;
-    requires io.reactivex.rxjava2;
     requires com.google.errorprone.annotations;
     requires jbcrypt;
+    requires io.reactivex.rxjava3;
+    requires fontawesomefx;
 
     opens org.miu.mppproject.librarysystem.libraryapp to javafx.fxml;
     exports org.miu.mppproject.librarysystem.libraryapp;

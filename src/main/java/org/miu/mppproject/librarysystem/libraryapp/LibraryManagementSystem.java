@@ -1,22 +1,18 @@
 package org.miu.mppproject.librarysystem.libraryapp;
 
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import org.miu.mppproject.librarysystem.libraryapp.core.dataaccessfacade.CredentialDataSource;
-import org.miu.mppproject.librarysystem.libraryapp.core.dataaccessfacade.DataSource;
-import org.miu.mppproject.librarysystem.libraryapp.core.dataaccessfacade.LibraryDataSource;
-import org.miu.mppproject.librarysystem.libraryapp.core.di.AppComponent;
-import org.miu.mppproject.librarysystem.libraryapp.core.di.DaggerAppComponent;
-import org.miu.mppproject.librarysystem.libraryapp.core.navigation.NavigationController;
-import org.miu.mppproject.librarysystem.libraryapp.core.navigation.ScreenManager;
+import org.miu.mppproject.librarysystem.libraryapp.backend.core.dataaccessfacade.CredentialDataSource;
+import org.miu.mppproject.librarysystem.libraryapp.backend.core.dataaccessfacade.DataSource;
+import org.miu.mppproject.librarysystem.libraryapp.backend.core.dataaccessfacade.LibraryDataSource;
+import org.miu.mppproject.librarysystem.libraryapp.backend.core.di.AppComponent;
+import org.miu.mppproject.librarysystem.libraryapp.backend.core.di.DaggerAppComponent;
+import org.miu.mppproject.librarysystem.libraryapp.frontend.features.ShowScreenEvent;
+import org.miu.mppproject.librarysystem.libraryapp.frontend.features.SplashScreen;
+import org.miu.mppproject.librarysystem.libraryapp.frontend.navigation.NavigationController;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Objects;
 
 public class LibraryManagementSystem extends Application {
 
@@ -29,27 +25,28 @@ public class LibraryManagementSystem extends Application {
 //    @Named("Lib")
 //    DataSource libDataSource;
 
+    private NavigationController navigationController;
 
     @Override
     public void start(Stage primaryStage) {
+        // Initialize the NavigationController with the primary stage
+        navigationController = new NavigationController(primaryStage);
+        navigationController.initialize();
 
+        // Create the splash screen and show it
+        SplashScreen splashScreen = new SplashScreen(navigationController);
 
-        StackPane root = new StackPane();
-        ScreenManager screenManager = new ScreenManager(root);
-        new NavigationController(screenManager, root);
-
-        Scene scene = new Scene(root, 800, 600);
-        scene.getStylesheets()
-                .add(Objects.requireNonNull(getClass()
-                        .getResource("/styles.css")).toExternalForm()); // Add the CSS file
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        // Use the navigation controller to display the splash screen
+        navigationController.publishEvent(new ShowScreenEvent(splashScreen));
     }
+
+
+
 
     @Override
     public void init() throws Exception {
         super.init();
-       initDb();
+        initDb();
 
     }
 
