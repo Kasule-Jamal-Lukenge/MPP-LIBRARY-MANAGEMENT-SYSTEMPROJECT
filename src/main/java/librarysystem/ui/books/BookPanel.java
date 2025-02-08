@@ -6,6 +6,7 @@ import business.SystemController;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
@@ -13,7 +14,6 @@ import java.util.Map;
 public class BookPanel extends JFrame {
 
     private SystemController systemController = new SystemController();
-    // maybe recheck above
     private JTable bookTable;
     private DefaultTableModel model;
     private String role;
@@ -21,7 +21,7 @@ public class BookPanel extends JFrame {
     public BookPanel(String role) {
         this.role = role;
         setTitle("Manage Books");
-        setSize(600, 400);
+        setSize(650, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -40,7 +40,7 @@ public class BookPanel extends JFrame {
             String isbn = book.getIsbn();
             String title = book.getTitle();
             String authors = String.join(", ", book.getAuthors().stream()
-                    .map(author -> author.getFirstName() +" "+ author.getLastName()) // Assuming `Author` has a `getName()` method
+                    .map(author -> author.getFirstName() + " " + author.getLastName()) // Assuming `Author` has a `getName()` method
                     .toArray(String[]::new));
             int maxCheckoutLength = book.getMaxCheckoutLength();
             int copies = book.getNumCopies(); // Get the number of copies
@@ -54,6 +54,11 @@ public class BookPanel extends JFrame {
 
         bookTable = new JTable(model);
 
+        // Set the border around the table
+        Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 5); // 1px black border
+        JScrollPane scrollPane = new JScrollPane(bookTable);
+        scrollPane.setBorder(border); // Set the border for the JScrollPane
+
         // Add Buttons Based on Role
         JPanel buttonPanel = new JPanel();
         JButton addButton = new JButton("Add Book");
@@ -62,7 +67,7 @@ public class BookPanel extends JFrame {
             buttonPanel.add(addButton);
         }
 
-        add(new JScrollPane(bookTable), BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER); // Add the JScrollPane with the border
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Handle Row Click (View Book Details)
@@ -88,6 +93,7 @@ public class BookPanel extends JFrame {
         setVisible(true);
     }
 }
+
 
 // Book Details Popup
 class BookDetailsFrame extends JFrame {
@@ -167,36 +173,6 @@ class BookDetailsFrame extends JFrame {
         // Notify the JTable to refresh the data
         bookTable.revalidate();
         bookTable.repaint();
-    }
-}
-
-
-class AddBookForm extends JFrame {
-    public AddBookForm() {
-        setTitle("Add New Book");
-        setSize(400, 300);
-        setLocationRelativeTo(null);
-        setLayout(new GridLayout(5, 2, 10, 10));
-
-        JTextField titleField = new JTextField();
-        JTextField isbnField = new JTextField();
-        JTextField authorsField = new JTextField();
-        JTextField checkoutLengthField = new JTextField();
-        JButton saveButton = new JButton("Save");
-
-        add(new JLabel("Title:"));
-        add(titleField);
-        add(new JLabel("ISBN:"));
-        add(isbnField);
-        add(new JLabel("Authors (comma-separated):"));
-        add(authorsField);
-        add(new JLabel("Max Checkout Length:"));
-        add(checkoutLengthField);
-        add(saveButton);
-
-        saveButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Book Added"));
-
-        setVisible(true);
     }
 }
 

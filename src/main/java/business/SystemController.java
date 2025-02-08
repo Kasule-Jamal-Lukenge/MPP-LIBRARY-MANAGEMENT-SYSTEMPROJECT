@@ -73,6 +73,10 @@ public class SystemController implements ControllerInterface {
 		BookCopy copy = new BookCopy(book, quantity+1, true);
 		da.addBookCopy(copy);
 	}
+	@Override
+	public void addBook(Book newBook) {
+
+	}
 //	public void checkoutBook(String memberId, String isbn) throws LibrarySystemException {
 //		DataAccess da = new DataAccessFacade();
 //
