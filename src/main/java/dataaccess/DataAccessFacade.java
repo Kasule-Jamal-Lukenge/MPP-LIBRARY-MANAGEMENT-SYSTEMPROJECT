@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.*;
 
 import business.*;
-import dataaccess.DataAccessFacade.StorageType;
+import dataaccess.storage.DatabaseConnection;
 
 
 public class DataAccessFacade implements DataAccess {
@@ -13,108 +13,17 @@ public class DataAccessFacade implements DataAccess {
 	enum StorageType {
 		BOOKS, MEMBERS, USERS;
 	}
-	private static final String DB_URL = "jdbc:postgresql://localhost:5432/library";
-	private static final String USER = "postgres";
-	private static final String PASSWORD = "12345";
 	public static final String DATE_PATTERN = "MM/dd/yyyy";
 
-
-	static {
-		initializeDatabase();
-	}
 	// Establish Database Connection
-	private static Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(DB_URL, USER, PASSWORD);
-	}
 
-	private static void initializeDatabase() {
-		try (Connection conn = DataAccessFacade.getConnection();
-			 Statement stmt = conn.createStatement()) {
-
-			// Books Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS book ( \n" +
-					"    isbn VARCHAR(20) PRIMARY KEY, \n" +
-					"    title VARCHAR(255), \n" +
-					"    max_checkout_length INT \n" +
-					");");
-
-			// Address Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS address ( \n" +
-					"    id SERIAL PRIMARY KEY, \n" +
-					"    street VARCHAR(255), \n" +
-					"    city VARCHAR(255), \n" +
-					"    state VARCHAR(255), \n" +
-					"    zip VARCHAR(10) \n" +
-					");");
-
-			// Library Membership Table
-			// Members Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS member ( \n" +
-					"    memberId VARCHAR(10) NOT NULL PRIMARY KEY, \n" +
-					"    firstName VARCHAR(255) NOT NULL, \n" +
-					"    lastName VARCHAR(255) NOT NULL, \n" +
-					"    telephone VARCHAR(20), \n" +
-					"    address_id INT NOT NULL, \n" +
-					"    CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES address(id) ON DELETE CASCADE \n" +
-					");");
-
-			// Users Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS users (\n" +
-					"    id VARCHAR(10) PRIMARY KEY, \n" +
-					"    password VARCHAR(255), \n" +
-					"    auth_level VARCHAR(20) NOT NULL CHECK (auth_level IN ('LIBRARIAN', 'ADMIN', 'BOTH'))\n" +
-					");");
-
-			// Book Copies Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS book_copy ( \n" +
-					"    id SERIAL PRIMARY KEY, \n" +
-					"    book_isbn VARCHAR(20) NOT NULL, \n" +
-					"    copy_num INT NOT NULL, \n" +
-					"    is_available BOOLEAN DEFAULT TRUE, \n" +
-					"    CONSTRAINT fk_book FOREIGN KEY (book_isbn) REFERENCES book(isbn) ON DELETE CASCADE \n" +
-					");");
-
-			// Authors Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS author ( \n" +
-					"    authorId SERIAL PRIMARY KEY, \n" +
-					"    firstName VARCHAR(255) NOT NULL, \n" +
-					"    lastName VARCHAR(255) NOT NULL, \n" +
-					"    telephone VARCHAR(20), \n" +
-					"    address_id INT NOT NULL, \n" +
-					"    bio VARCHAR(255),\n" +
-					"    CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES address(id) ON DELETE CASCADE \n" +
-					");");
-
-			// Books_Authors Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS book_author (\n" +
-					"    book_isbn VARCHAR(20) NOT NULL, \n" +
-					"    author_id INT NOT NULL, \n" +
-					"    CONSTRAINT fk_book_authors_book FOREIGN KEY (book_isbn) REFERENCES book(isbn) ON DELETE CASCADE, \n" +
-					"    CONSTRAINT fk_book_authors_author FOREIGN KEY (author_id) REFERENCES author(authorId) ON DELETE CASCADE\n" +
-					");");
-			// Checkout Records Table
-			stmt.execute("CREATE TABLE IF NOT EXISTS checkout_record ( \n" +
-					"    id SERIAL PRIMARY KEY, \n" +
-					"    member_id VARCHAR(10) NOT NULL, \n" +
-					"    book_copy_id INT NOT NULL, \n" +
-					"    checkout_date DATE NOT NULL, \n" +
-					"    due_date DATE NOT NULL, \n" +
-					"    is_returned BOOLEAN DEFAULT FALSE, \n" +
-					"    CONSTRAINT fk_member FOREIGN KEY (member_id) REFERENCES member(memberId) ON DELETE CASCADE, \n" +
-					"    CONSTRAINT fk_book_copy FOREIGN KEY (book_copy_id) REFERENCES book_copy(id) ON DELETE CASCADE \n" +
-					");");  // Added the missing closing parenthesis
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
 
 	public void saveNewMember(LibraryMember member) {
 		// First, insert the address into the address table
 		String addressQuery = "INSERT INTO address (street, city, state, zip) VALUES (?, ?, ?, ?)";
 		String memberQuery = "INSERT INTO member (memberId, firstName, lastName, telephone, address_id) VALUES (?, ?, ?, ?, ?)";
 
-		try (Connection conn = getConnection()) {
+		try (Connection conn = DatabaseConnection.getConnection()) {
 			// Start a transaction
 			conn.setAutoCommit(false);
 
@@ -167,7 +76,7 @@ public class DataAccessFacade implements DataAccess {
 		String bookAuthorQuery = "INSERT INTO book_author (book_isbn, author_id) VALUES (?, ?) ON CONFLICT DO NOTHING;";
 		String bookCopyQuery = "INSERT INTO book_copy (book_isbn, copy_num, is_available) VALUES (?, ?, ?) ON CONFLICT DO NOTHING;";
 
-		try (Connection conn = getConnection()) {
+		try (Connection conn = DatabaseConnection.getConnection()) {
 			conn.setAutoCommit(false);
 
 			// Insert Book
@@ -255,7 +164,7 @@ public class DataAccessFacade implements DataAccess {
 
 		String copiesQuery = "SELECT bc.copy_num, bc.is_available FROM book_copy bc WHERE bc.book_isbn = ?";
 
-		try (Connection conn = getConnection();
+		try (Connection conn = DatabaseConnection.getConnection();
 			 Statement stmt = conn.createStatement();
 			 ResultSet rs = stmt.executeQuery(query)) {
 
@@ -319,7 +228,7 @@ public class DataAccessFacade implements DataAccess {
 		String query = "SELECT m.memberId, m.firstName, m.lastName, m.telephone, a.street, a.city, a.state, a.zip " +
 				"FROM member m " +
 				"JOIN address a ON m.address_id = a.id";  // Join member table with address table
-		try (Connection conn = DataAccessFacade.getConnection();
+		try (Connection conn = DatabaseConnection.getConnection();
 			 Statement stmt = conn.createStatement();
 			 ResultSet rs = stmt.executeQuery(query)) {
 			while (rs.next()) {
@@ -344,7 +253,7 @@ public class DataAccessFacade implements DataAccess {
 	public HashMap<String, User> readUserMap() {
 		HashMap<String, User> users = new HashMap<>();
 		String query = "SELECT * FROM users";
-		try (Connection conn = DataAccessFacade.getConnection();
+		try (Connection conn = DatabaseConnection.getConnection();
 			 Statement stmt = conn.createStatement();
 			 ResultSet rs = stmt.executeQuery(query)) {
 			while (rs.next()) {
@@ -359,7 +268,7 @@ public class DataAccessFacade implements DataAccess {
 	// addBookCopy
 	public void addBookCopy(BookCopy copy) {
 		String query = "INSERT INTO book_copy (book_isbn, copy_num, is_available) VALUES (?,?,?)";
-		try (Connection conn = DataAccessFacade.getConnection();
+		try (Connection conn = DatabaseConnection.getConnection();
 			 PreparedStatement pstmt = conn.prepareStatement(query)) {
 			pstmt.setString(1, copy.getBook().getIsbn());
 			pstmt.setInt(2, copy.getCopyNum());
@@ -409,7 +318,7 @@ public class DataAccessFacade implements DataAccess {
 	// Load Books into Database
 	static void loadBookMap(List<Book> bookList) {
 		List<Book> bookListTest = bookList;
-		try (Connection conn = getConnection()) {
+		try (Connection conn = DatabaseConnection.getConnection()) {
 			String addressSql = "INSERT INTO address (street, city, state, zip) VALUES (?, ?, ?, ?) " +
 					"ON CONFLICT (id) DO UPDATE SET street = EXCLUDED.street, city = EXCLUDED.city, " +
 					"state = EXCLUDED.state, zip = EXCLUDED.zip RETURNING id";
@@ -502,7 +411,7 @@ public class DataAccessFacade implements DataAccess {
 
 	// Load Users into Database
 	static void loadUserMap(List<User> userList) {
-		try (Connection conn = getConnection()) {
+		try (Connection conn = DatabaseConnection.getConnection()) {
 			String sql = "INSERT INTO users (id, password, auth_level) VALUES (?, ?, ?)";
 			try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 				for (User user : userList) {
@@ -519,7 +428,7 @@ public class DataAccessFacade implements DataAccess {
 
 	// Load Members into Database
 	static void loadMemberMap(List<LibraryMember> memberList) {
-		try (Connection conn = getConnection()) {
+		try (Connection conn = DatabaseConnection.getConnection()) {
 			String addressSql = "INSERT INTO address (street, city, state, zip) VALUES (?, ?, ?, ?) RETURNING id";
 			String memberSql = "INSERT INTO member (memberId, firstName, lastName, telephone, address_id) VALUES (?, ?, ?, ?, ?) " +
 					"ON CONFLICT (memberId) DO UPDATE SET firstName = EXCLUDED.firstName, lastName = EXCLUDED.lastName, " +
