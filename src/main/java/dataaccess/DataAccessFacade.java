@@ -15,13 +15,13 @@ import dataaccess.DataAccessFacade.StorageType;
 
 
 public class DataAccessFacade implements DataAccess {
-	
+
 	enum StorageType {
 		BOOKS, MEMBERS, USERS;
 	}
 	private static final String DB_URL = "jdbc:postgresql://localhost:5432/library";
 	private static final String USER = "postgres";
-	private static final String PASSWORD = "Benklins@123";
+	private static final String PASSWORD = "12345";
 	public static final String DATE_PATTERN = "MM/dd/yyyy";
 
 
@@ -80,8 +80,8 @@ public class DataAccessFacade implements DataAccess {
 					"    CONSTRAINT fk_book FOREIGN KEY (book_isbn) REFERENCES book(isbn) ON DELETE CASCADE \n" +
 					");");
 
-            // Authors Table
-            stmt.execute("CREATE TABLE IF NOT EXISTS author ( \n" +
+			// Authors Table
+			stmt.execute("CREATE TABLE IF NOT EXISTS author ( \n" +
 					"    authorId SERIAL PRIMARY KEY, \n" +
 					"    firstName VARCHAR(255) NOT NULL, \n" +
 					"    lastName VARCHAR(255) NOT NULL, \n" +
@@ -91,8 +91,8 @@ public class DataAccessFacade implements DataAccess {
 					"    CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES address(id) ON DELETE CASCADE \n" +
 					");");
 
-            // Books_Authors Table
-            stmt.execute("CREATE TABLE IF NOT EXISTS book_author (\n" +
+			// Books_Authors Table
+			stmt.execute("CREATE TABLE IF NOT EXISTS book_author (\n" +
 					"    book_isbn VARCHAR(20) NOT NULL, \n" +
 					"    author_id INT NOT NULL, \n" +
 					"    CONSTRAINT fk_book_authors_book FOREIGN KEY (book_isbn) REFERENCES book(isbn) ON DELETE CASCADE, \n" +
@@ -170,13 +170,12 @@ public class DataAccessFacade implements DataAccess {
 	public HashMap<String, Book> readBooksMap() {
 		HashMap<String, Book> books = new HashMap<>();
 		String query = "SELECT b.isbn, b.title, b.max_checkout_length, " +
-				"       a.authorId, a.firstName AS author_first_name, a.lastName AS author_last_name, a.bio, " +
-				"       bc.copy_num, bc.is_available " +
+				"       a.authorId, a.firstName AS author_first_name, a.lastName AS author_last_name, a.bio " +
 				"FROM book b " +
 				"LEFT JOIN book_author ba ON b.isbn = ba.book_isbn " +
-				"LEFT JOIN author a ON ba.author_id = a.authorId " +
-				"LEFT JOIN book_copy bc ON b.isbn = bc.book_isbn " +
-				"ORDER BY b.isbn, bc.copy_num";
+				"LEFT JOIN author a ON ba.author_id = a.authorId";
+
+		String copiesQuery = "SELECT bc.copy_num, bc.is_available FROM book_copy bc WHERE bc.book_isbn = ?";
 
 		try (Connection conn = getConnection();
 			 Statement stmt = conn.createStatement();
@@ -204,24 +203,29 @@ public class DataAccessFacade implements DataAccess {
 
 				// Ensure the book exists in the map
 				books.putIfAbsent(isbn, new Book(isbn, title, maxCheckoutLength, authorsByIsbn.getOrDefault(isbn, new ArrayList<>())));
+			}
 
-				// Add book copies
-				int copyNum = rs.getInt("copy_num");
-				boolean isAvailable = rs.getBoolean("is_available");
-				if (!rs.wasNull() && books.containsKey(isbn)) { // Ensure book copy data is valid
-					Book book = books.get(isbn);
+			// Now, fetch the book copies for each book
+			for (Map.Entry<String, Book> entry : books.entrySet()) {
+				String isbn = entry.getKey();
+				Book book = entry.getValue();
 
-					// Create a BookCopy object for the current copy
-					BookCopy bookCopy = new BookCopy(book, copyNum, isAvailable);
-// Check if the book copy already exists using BookCopy's equals method
-					boolean copyExists = Arrays.stream(book.getCopies()).anyMatch(existingCopy -> existingCopy.equals(bookCopy));
+				book.clearCopies(); // Ensure the list is empty before adding copies
 
-					if (!copyExists) {
-						// Add the copy to the book
-						book.addCopy();
+				try (PreparedStatement pstmt = conn.prepareStatement(copiesQuery)) {
+					pstmt.setString(1, isbn);
+					try (ResultSet copyRs = pstmt.executeQuery()) {
+						while (copyRs.next()) {
+							int copyNum = copyRs.getInt("copy_num");
+							boolean isAvailable = copyRs.getBoolean("is_available");
+							BookCopy bookCopy = new BookCopy(book, copyNum, isAvailable);
+							book.addCopy(bookCopy);
+						}
 					}
 				}
 			}
+
+
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -229,9 +233,6 @@ public class DataAccessFacade implements DataAccess {
 
 		return books;
 	}
-
-
-
 
 
 	// Read all members from PostgreSQL
@@ -279,19 +280,19 @@ public class DataAccessFacade implements DataAccess {
 	}
 	// addBookCopy
 	public void addBookCopy(BookCopy copy) {
-        String query = "INSERT INTO book_copy (book_isbn, copy_num, is_available) VALUES (?,?,?)";
-        try (Connection conn = DataAccessFacade.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, copy.getBook().getIsbn());
-            pstmt.setInt(2, copy.getCopyNum());
-            pstmt.setBoolean(3, copy.isAvailable());
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+		String query = "INSERT INTO book_copy (book_isbn, copy_num, is_available) VALUES (?,?,?)";
+		try (Connection conn = DataAccessFacade.getConnection();
+			 PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setString(1, copy.getBook().getIsbn());
+			pstmt.setInt(2, copy.getCopyNum());
+			pstmt.setBoolean(3, copy.isAvailable());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
-    // Update book copy status
+	// Update book copy status
 
 	// Save a checkout record
 //	public void saveCheckoutRecord(CheckoutRecord record) {
@@ -515,18 +516,18 @@ public class DataAccessFacade implements DataAccess {
 //		}
 //		return retVal;
 //	}
-	
-	
-	
+
+
+
 	final static class Pair<S,T> implements Serializable{
-		
+
 		S first;
 		T second;
 		Pair(S s, T t) {
 			first = s;
 			second = t;
 		}
-		@Override 
+		@Override
 		public boolean equals(Object ob) {
 			if(ob == null) return false;
 			if(this == ob) return true;
@@ -535,8 +536,8 @@ public class DataAccessFacade implements DataAccess {
 			Pair<S,T> p = (Pair<S,T>)ob;
 			return p.first.equals(first) && p.second.equals(second);
 		}
-		
-		@Override 
+
+		@Override
 		public int hashCode() {
 			return first.hashCode() + 5 * second.hashCode();
 		}
@@ -546,5 +547,5 @@ public class DataAccessFacade implements DataAccess {
 		}
 		private static final long serialVersionUID = 5399827794066637059L;
 	}
-	
+
 }
