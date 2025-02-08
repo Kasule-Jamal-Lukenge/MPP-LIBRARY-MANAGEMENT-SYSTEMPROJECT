@@ -125,7 +125,7 @@ public class AddBookForm extends JFrame {
         }
 
         Book newBook = new Book(isbn, title, maxCheckoutLength, authors);
-        systemController.addBook(newBook);
+        systemController.saveBook(newBook);
         JOptionPane.showMessageDialog(this, "Book Added Successfully!");
         dispose();
     }

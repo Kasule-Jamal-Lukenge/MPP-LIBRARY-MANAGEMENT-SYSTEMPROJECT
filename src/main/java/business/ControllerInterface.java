@@ -18,6 +18,6 @@ public interface ControllerInterface {
 	public void addBookCopy(String isbn, int quantity);
 	public List<String> allBookIds();
 	public HashMap<String,Book> allBooks();
-	public void addBook(Book newBook);
+	public void saveBook(Book newBook);
 	
 }

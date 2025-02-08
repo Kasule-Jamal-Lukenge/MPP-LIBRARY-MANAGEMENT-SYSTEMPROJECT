@@ -1,12 +1,6 @@
 package dataaccess;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+
 import java.io.Serializable;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 
@@ -160,6 +154,90 @@ public class DataAccessFacade implements DataAccess {
 				e.printStackTrace();
 			}
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void saveBook(Book newBook) {
+		String bookQuery = "INSERT INTO book (isbn, title, max_checkout_length) VALUES (?, ?, ?);";
+		String addressQuery = "INSERT INTO address (street, city, state, zip) VALUES (?, ?, ?, ?);";
+		String authorQuery = "INSERT INTO author (firstName, lastName, telephone, bio, address_id) VALUES (?, ?, ?, ?, ?)";
+		String bookAuthorQuery = "INSERT INTO book_author (book_isbn, author_id) VALUES (?, ?) ON CONFLICT DO NOTHING;";
+		String bookCopyQuery = "INSERT INTO book_copy (book_isbn, copy_num, is_available) VALUES (?, ?, ?) ON CONFLICT DO NOTHING;";
+
+		try (Connection conn = getConnection()) {
+			conn.setAutoCommit(false);
+
+			// Insert Book
+			try (PreparedStatement bookStmt = conn.prepareStatement(bookQuery)) {
+				bookStmt.setString(1, newBook.getIsbn());
+				bookStmt.setString(2, newBook.getTitle());
+				bookStmt.setInt(3, newBook.getMaxCheckoutLength());
+				bookStmt.executeUpdate();
+			}
+
+			// Insert Authors
+			for (Author author : newBook.getAuthors()) {
+				int addressId = -1;
+				int authorId = -1;
+
+				// Insert Address
+				try (PreparedStatement addressStmt = conn.prepareStatement(addressQuery, Statement.RETURN_GENERATED_KEYS)) {
+					Address address = author.getAddress();
+					addressStmt.setString(1, address.getStreet());
+					addressStmt.setString(2, address.getCity());
+					addressStmt.setString(3, address.getState());
+					addressStmt.setString(4, address.getZip());
+					addressStmt.executeUpdate();
+
+					try (ResultSet generatedKeys = addressStmt.getGeneratedKeys()) {
+						if (generatedKeys.next()) {
+							addressId = generatedKeys.getInt(1);
+						}
+					}
+				}
+
+				// Insert Author
+				if (addressId != -1) {
+					try (PreparedStatement authorStmt = conn.prepareStatement(authorQuery, Statement.RETURN_GENERATED_KEYS)) {
+						authorStmt.setString(1, author.getFirstName());
+						authorStmt.setString(2, author.getLastName());
+						authorStmt.setString(3, author.getTelephone());
+						authorStmt.setString(4, author.getBio());
+						authorStmt.setInt(5, addressId);
+						authorStmt.executeUpdate();
+
+						try (ResultSet generatedKeys = authorStmt.getGeneratedKeys()) {
+							if (generatedKeys.next()) {
+								authorId = generatedKeys.getInt(1);
+							}
+						}
+					}
+				}
+
+				// Link Book to Author
+				if (authorId != -1) {
+					try (PreparedStatement bookAuthorStmt = conn.prepareStatement(bookAuthorQuery)) {
+						bookAuthorStmt.setString(1, newBook.getIsbn());
+						bookAuthorStmt.setInt(2, authorId);
+						bookAuthorStmt.executeUpdate();
+					}
+				}
+			}
+
+			// Insert Book Copies
+			for (BookCopy copy : newBook.getCopies()) {
+				try (PreparedStatement bookCopyStmt = conn.prepareStatement(bookCopyQuery)) {
+					bookCopyStmt.setString(1, newBook.getIsbn());
+					bookCopyStmt.setInt(2, copy.getCopyNum());
+					bookCopyStmt.setBoolean(3, copy.isAvailable());
+					bookCopyStmt.executeUpdate();
+				}
+			}
+
+			conn.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -480,43 +558,6 @@ public class DataAccessFacade implements DataAccess {
 			e.printStackTrace();
 		}
 	}
-
-//	static void saveToStorage(StorageType type, Object ob) {
-//		ObjectOutputStream out = null;
-//		try {
-//			Path path = FileSystems.getDefault().getPath(OUTPUT_DIR, type.toString());
-//			out = new ObjectOutputStream(Files.newOutputStream(path));
-//			out.writeObject(ob);
-//		} catch(IOException e) {
-//			e.printStackTrace();
-//		} finally {
-//			if(out != null) {
-//				try {
-//					out.close();
-//				} catch(Exception e) {}
-//			}
-//		}
-//	}
-//
-//	static Object readFromStorage(StorageType type) {
-//		ObjectInputStream in = null;
-//		Object retVal = null;
-//		try {
-//			Path path = FileSystems.getDefault().getPath(OUTPUT_DIR, type.toString());
-//			in = new ObjectInputStream(Files.newInputStream(path));
-//			retVal = in.readObject();
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			if(in != null) {
-//				try {
-//					in.close();
-//				} catch(Exception e) {}
-//			}
-//		}
-//		return retVal;
-//	}
-
 
 
 	final static class Pair<S,T> implements Serializable{
