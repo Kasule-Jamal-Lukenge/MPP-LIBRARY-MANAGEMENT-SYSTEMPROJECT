@@ -63,7 +63,7 @@ public class BookPanel extends JFrame {
         JPanel buttonPanel = new JPanel();
         JButton addButton = new JButton("Add Book");
         if (!role.equals("LIBRARIAN")) {
-            addButton.addActionListener(e -> new AddBookForm());
+            addButton.addActionListener(e -> new AddBookForm(this::refreshBookTable));
             buttonPanel.add(addButton);
         }
 
@@ -76,6 +76,7 @@ public class BookPanel extends JFrame {
                 int row = bookTable.getSelectedRow();
                 if (row >= 0) {
                     new BookDetailsFrame(
+                            this::refreshBookTable,
                             bookTable, // Pass the JTable here
                             model, // Pass the model here
                             model.getValueAt(row, 0).toString(),
@@ -92,59 +93,7 @@ public class BookPanel extends JFrame {
 
         setVisible(true);
     }
-}
-
-
-// Book Details Popup
-class BookDetailsFrame extends JFrame {
-    private SystemController systemController = new SystemController();
-    private JTable bookTable;
-    private DefaultTableModel model;
-    private String role;
-
-    public BookDetailsFrame(JTable bookTable, DefaultTableModel model, String isbn, String title, String authors, String maxCheckout, int numCopies, int availableCopies, String role) {
-        setTitle("Book Details - " + title);
-        setSize(400, 250);
-        setLocationRelativeTo(null);
-        setLayout(new GridLayout(5, 2, 10, 10));
-        this.bookTable = bookTable; // Assign passed bookTable
-        this.model = model;
-        this.role = role;
-        systemController = new SystemController();
-
-        add(new JLabel("ISBN:"));
-        add(new JLabel(isbn));
-        add(new JLabel("Title:"));
-        add(new JLabel(title));
-        add(new JLabel("Authors:"));
-        add(new JLabel(authors));
-        add(new JLabel("Max Checkout:"));
-        add(new JLabel(maxCheckout));
-
-        // Role-based Buttons
-        if (role.equals("ADMIN") || role.equals("BOTH")) {
-            JButton addCopyButton = new JButton("Add Copy");
-            addCopyButton.addActionListener(e -> {
-                // Add a copy to the system
-                systemController.addBookCopy(isbn, numCopies); // Assuming addBookCopy is defined to add a copy
-
-                // Refresh the book table
-                refreshBookTable();
-                JOptionPane.showMessageDialog(this, "Copy Added");
-            });
-            add(addCopyButton);
-        }
-
-        if (role.equals("LIBRARIAN") || role.equals("BOTH")) {
-            JButton checkoutButton = new JButton("Checkout A Copy");
-            checkoutButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Book Checked Out"));
-            add(checkoutButton);
-        }
-
-        setVisible(true);
-    }
-
-    private void refreshBookTable() {
+    public void refreshBookTable() {
 // Fetch all books from the systemController again
         Map<String, Book> books = systemController.allBooks();
 
@@ -174,5 +123,7 @@ class BookDetailsFrame extends JFrame {
         bookTable.revalidate();
         bookTable.repaint();
     }
+
 }
+
 

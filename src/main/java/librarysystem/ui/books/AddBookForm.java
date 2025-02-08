@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddBookForm extends JFrame {
+    private Runnable bookPanel; // Callback function
     private JTextField titleField;
     private JTextField isbnField;
     private JComboBox<Integer> checkoutLengthDropdown;
@@ -18,7 +19,8 @@ public class AddBookForm extends JFrame {
     private List<AuthorFields> authorFieldsList;
     private SystemController systemController;
 
-    public AddBookForm() {
+    public AddBookForm(Runnable bookPanel) {
+        this.bookPanel = bookPanel;
         systemController = new SystemController();
         authorFieldsList = new ArrayList<>();
 
@@ -27,6 +29,12 @@ public class AddBookForm extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
+        // Initialize UI Components
+        initUI();
+
+        setVisible(true);
+    }
+    private void initUI() {
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Adds padding
 
@@ -68,9 +76,7 @@ public class AddBookForm extends JFrame {
 
         addAuthorFields(false); // Add default author fields (cannot be removed)
 
-        setVisible(true);
     }
-
 
     private void addAuthorFields(boolean removable) {
         AuthorFields authorFields = new AuthorFields(removable);
@@ -127,6 +133,12 @@ public class AddBookForm extends JFrame {
         Book newBook = new Book(isbn, title, maxCheckoutLength, authors);
         systemController.saveBook(newBook);
         JOptionPane.showMessageDialog(this, "Book Added Successfully!");
+
+        // Refresh the book panel
+        if (bookPanel != null) {
+            bookPanel.run();
+        }
+
         dispose();
     }
 
