@@ -21,7 +21,7 @@ public class BookPanel extends JFrame {
     public BookPanel(String role) {
         this.role = role;
         setTitle("Manage Books");
-        setSize(650, 500);
+        setSize(1200, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -31,7 +31,7 @@ public class BookPanel extends JFrame {
         System.out.println(books);
 
         // Prepare the columns for the table
-        String[] columns = {"ISBN", "Title", "Authors", "Max Checkout", "numOfCopies", "Available Copies"};
+        String[] columns = {"ISBN", "Title", "Authors", "Max Checkout", "num of Copies", "Available Copies"};
 
         // Initialize the DefaultTableModel with empty data
         model = new DefaultTableModel(columns, 0);
@@ -53,7 +53,7 @@ public class BookPanel extends JFrame {
         }
 
         bookTable = new JTable(model);
-
+        bookTable.setRowHeight(25); // Increase row height to 25 pixels
         // Set the border around the table
         Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 5); // 1px black border
         JScrollPane scrollPane = new JScrollPane(bookTable);
@@ -96,9 +96,6 @@ public class BookPanel extends JFrame {
     public void refreshBookTable() {
 // Fetch all books from the systemController again
         Map<String, Book> books = systemController.allBooks();
-
-        // Prepare the columns for the table
-        String[] columns = {"ISBN", "Title", "Authors", "Max Checkout", "numCopies", "Available Copies"};
 
         // Clear existing rows
         model.setRowCount(0);

@@ -18,7 +18,7 @@ public class MemberPanel extends JFrame {
 
     public MemberPanel(String role) {
         setTitle("Manage Members");
-        setSize(700, 500);
+        setSize(1200, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

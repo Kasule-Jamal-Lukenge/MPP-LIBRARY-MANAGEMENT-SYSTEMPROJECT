@@ -32,7 +32,7 @@ public class AddMemberForm extends JFrame {
         this.refreshCallback = refreshCallback;
 
         setTitle("Add New Member");
-        setSize(400, 350);
+        setSize(300, 400);
         setLocationRelativeTo(null);
         setLayout(new GridBagLayout()); // Use GridBagLayout for better control
 
@@ -40,6 +40,7 @@ public class AddMemberForm extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5); // Padding between components
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0; // Allow components to stretch horizontally
 
         // Components
         firstNameLabel = new JLabel("First Name:");
@@ -105,6 +106,7 @@ public class AddMemberForm extends JFrame {
         add(firstNameLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(firstNameField, gbc);
 
         // Row 2 - Last Name
@@ -113,6 +115,7 @@ public class AddMemberForm extends JFrame {
         add(lastNameLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(lastNameField, gbc);
 
         // Row 3 - Telephone
@@ -121,6 +124,7 @@ public class AddMemberForm extends JFrame {
         add(telephoneLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(telephoneField, gbc);
 
         // Row 4 - Address Label (Spanning Two Columns)
@@ -136,6 +140,7 @@ public class AddMemberForm extends JFrame {
         add(streetLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(streetField, gbc);
 
         // Row 6 - City
@@ -144,6 +149,7 @@ public class AddMemberForm extends JFrame {
         add(cityLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(cityField, gbc);
 
         // Row 7 - State
@@ -152,6 +158,7 @@ public class AddMemberForm extends JFrame {
         add(stateLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(stateField, gbc);
 
         // Row 8 - Zip Code
@@ -160,6 +167,7 @@ public class AddMemberForm extends JFrame {
         add(zipLabel, gbc);
 
         gbc.gridx = 1;
+        gbc.weightx = 1.0;
         add(zipField, gbc);
 
         // Row 9 - Save Button
